@@ -47,6 +47,8 @@ var (
 				os.Exit(1)
 			}
 
+			encodedCertificate = strings.Map(clean, encodedCertificate)
+
 			certificate, err := extract.Extract(encodedCertificate)
 			if err != nil {
 				panic(err)
@@ -75,4 +77,17 @@ func init() {
 func isInputFromPipe() bool {
 	fileInfo, _ := os.Stdin.Stat()
 	return fileInfo.Mode()&os.ModeCharDevice == 0
+}
+
+func clean(r rune) rune {
+	// check for valid base64 chars
+	if (r >= 48 && r <= 57) || // 0-9
+		(r >= 65 && r <= 90) || // A-Z
+		(r >= 97 && r <= 122) || // a-z
+		r == 43 || // +
+		r == 47 || // /
+		r == 61 { // =
+		return r
+	}
+	return -1
 }
