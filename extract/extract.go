@@ -12,31 +12,22 @@ var (
 	iv  = []byte("wuD6keVr")
 )
 
-func Extract(certificate string) string {
-	decryptedCertificate, err := decryptDES(certificate)
-	if err != nil {
-		panic(err)
-	}
-
-	return decryptedCertificate
-}
-
-func decryptDES(certificate string) (string, error) {
+func Extract(certificate string) ([]byte, error) {
 	// Decode base64-encoded ciphertext
 	ciphertext, err := base64.StdEncoding.DecodeString(certificate)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Create a TripleDES block cipher
 	block, err := des.NewTripleDESCipher([]byte(key))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Check if the ciphertext length is a multiple of the block size
 	if len(ciphertext)%block.BlockSize() != 0 {
-		return "", fmt.Errorf("ciphertext is not a multiple of the block size")
+		return nil, fmt.Errorf("ciphertext is not a multiple of the block size")
 	}
 
 	// Create a mode with the given IV
@@ -49,5 +40,5 @@ func decryptDES(certificate string) (string, error) {
 	padLength := int(ciphertext[len(ciphertext)-1])
 	ciphertext = ciphertext[:len(ciphertext)-padLength]
 
-	return string(ciphertext), nil
+	return ciphertext, nil
 }

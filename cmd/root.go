@@ -4,6 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/pr0ph0z/fgo-certificate-extractor/extract"
 	"github.com/spf13/cobra"
@@ -22,8 +23,17 @@ var (
 				panic(err)
 			}
 
-			certificate := string(certificateByte[2:])
-			fmt.Println(extract.Extract(certificate))
+			encodedCertificate := string(certificateByte[2:])
+			certificate, err := extract.Extract(encodedCertificate)
+			if err != nil {
+				panic(err)
+			}
+
+			var obj map[string]interface{}
+			json.Unmarshal(certificate, &obj)
+
+			b, err := json.MarshalIndent(obj, "", "    ")
+			fmt.Println(string(b))
 		},
 	}
 )
